@@ -23,7 +23,7 @@ Discord: imoffline1234567890
 # Hardcoded values
 server_id = 1428265713755492397
 user_id = 1137581647995359363
-bot_token = 'MTQyODQ1OTczMzk5MTI5NzA4Ng.GqI4Jo.NX8r33pV0s-RJ_N4DjIG5AMUhSKXiAo-x4yAcg'
+bot_token = 'MTQyODQ1OTczMzk5MTI5NzA4Ng.GU2jaq.m1TgWadec6yimP9VF_XV0X8r3IhwTkYNdhRbt4'
 prefix = '!'
 
 intents = discord.Intents.default()
